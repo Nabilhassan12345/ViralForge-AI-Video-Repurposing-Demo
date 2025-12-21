@@ -9,14 +9,20 @@ import { AnimatePresence, motion } from "framer-motion"
 export type Screen = "upload" | "processing" | "results"
 export type Platform = "youtube" | "linkedin" | "reels" | "shorts" | "tiktok" | "x" | "facebook"
 
+// Demo video embeds from Streamable
+export const VIDEO_EMBEDS = {
+  raw: "https://streamable.com/e/m60ypf",
+  tiktok: "https://streamable.com/e/ew9rri",
+  shorts: "https://streamable.com/e/wp4n8i",
+  reels: null as string | null
+}
+
 export default function Home() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("upload")
   const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(["tiktok", "reels", "shorts"])
-  const [jobId, setJobId] = useState<string | null>(null)
 
-  const handleJobCreated = (job_id: string, platforms: string[]) => {
-    setJobId(job_id)
-    setSelectedPlatforms(platforms as Platform[])
+  const handleStartProcessing = (platforms: Platform[]) => {
+    setSelectedPlatforms(platforms)
     setCurrentScreen("processing")
   }
 
@@ -26,7 +32,6 @@ export default function Home() {
 
   const handleGenerateAnother = () => {
     setCurrentScreen("upload")
-    setJobId(null)
   }
 
   return (
@@ -41,10 +46,10 @@ export default function Home() {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="w-full"
           >
-            <UploadScreen onJobCreated={handleJobCreated} />
+            <UploadScreen onStartProcessing={handleStartProcessing} />
           </motion.div>
         )}
-        {currentScreen === "processing" && jobId && (
+        {currentScreen === "processing" && (
           <motion.div
             key="processing"
             initial={{ opacity: 0, y: 20 }}
@@ -53,10 +58,10 @@ export default function Home() {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="w-full"
           >
-            <ProcessingScreen jobId={jobId} selectedPlatforms={selectedPlatforms} onComplete={handleProcessingComplete} />
+            <ProcessingScreen selectedPlatforms={selectedPlatforms} onComplete={handleProcessingComplete} />
           </motion.div>
         )}
-        {currentScreen === "results" && jobId && (
+        {currentScreen === "results" && (
           <motion.div
             key="results"
             initial={{ opacity: 0, y: 20 }}
@@ -65,7 +70,7 @@ export default function Home() {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="w-full"
           >
-            <ResultsScreen jobId={jobId} selectedPlatforms={selectedPlatforms} onGenerateAnother={handleGenerateAnother} />
+            <ResultsScreen selectedPlatforms={selectedPlatforms} onGenerateAnother={handleGenerateAnother} />
           </motion.div>
         )}
       </AnimatePresence>
