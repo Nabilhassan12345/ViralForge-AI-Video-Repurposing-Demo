@@ -49,6 +49,8 @@ const exampleOutputs = [
   { platform: "x", score: 92, duration: "<1m", thumbnail: "/woman-sitting-on-orange-couch-talking-podcast-inte.jpg" },
 ]
 
+
+interface UploadScreenProps {
   onJobCreated: (job_id: string, selectedPlatforms: string[]) => void
 }
 
