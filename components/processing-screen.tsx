@@ -2,10 +2,12 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
+import { getJobEvents } from "../lib/api"
 import { Check, Loader2, Zap, Brain, Scissors, Film } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import type { Platform } from "@/app/page"
 import { ViralForgeLogo, AnimatedBackground, PrimaryButton } from "./ui/shared"
+
 
 interface ProcessingStep {
   id: string
@@ -17,11 +19,12 @@ interface ProcessingStep {
 }
 
 interface ProcessingScreenProps {
+  jobId: string
   selectedPlatforms: Platform[]
   onComplete: () => void
 }
 
-export function ProcessingScreen({ selectedPlatforms, onComplete }: ProcessingScreenProps) {
+export function ProcessingScreen({ jobId, selectedPlatforms, onComplete }: ProcessingScreenProps) {
   const [steps, setSteps] = useState<ProcessingStep[]>([
     {
       id: "analyzer",
@@ -61,64 +64,49 @@ export function ProcessingScreen({ selectedPlatforms, onComplete }: ProcessingSc
   const [overallProgress, setOverallProgress] = useState(0)
 
   useEffect(() => {
-    const messages = [
-      "Initializing AI pipeline...",
-      "Transcribing audio content...",
-      "Analyzing video frames...",
-      "Identifying viral moments...",
-      "Generating attention-grabbing hooks...",
-      "Optimizing for TikTok format...",
-      "Optimizing for Instagram Reels...",
-      "Optimizing for YouTube Shorts...",
-      "Rendering final clips...",
-      "Processing complete!",
-    ]
-
-    let currentStep = 0
-    let messageIndex = 0
-
-    const progressInterval = setInterval(() => {
-      setSteps((prev) => {
-        const newSteps = [...prev]
-        const step = newSteps[currentStep]
-
-        if (step.progress < 100) {
-          step.progress = Math.min(step.progress + Math.random() * 15 + 5, 100)
-          step.status = "processing"
+    // Listen to backend job events via SSE
+    const eventSource = getJobEvents(jobId)
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data)
+        // Example event: { job_id, agent, status, message, progress, ts, meta }
+        setStatusMessages((prev) => [...prev.slice(-4), data.message])
+        // Map backend agent to step index
+        const agentToStep: Record<string, number> = {
+          analyzer: 0,
+          hook: 1,
+          platform: 2,
+          renderer: 3,
         }
-
-        if (step.progress >= 100) {
-          step.status = "complete"
-          if (currentStep < 3) {
-            currentStep++
-            newSteps[currentStep].status = "processing"
-          } else {
-            clearInterval(progressInterval)
+        setSteps((prev) => {
+          const newSteps = [...prev]
+          const idx = agentToStep[data.agent] ?? -1
+          if (idx >= 0) {
+            newSteps[idx].progress = Math.max(newSteps[idx].progress, (data.progress || 0) * 100)
+            newSteps[idx].status = data.status === "complete" ? "complete" : "processing"
+            // Mark previous steps as complete
+            for (let i = 0; i < idx; i++) newSteps[i].status = "complete"
+          }
+          // If renderer is complete, mark all as complete
+          if (data.agent === "renderer" && data.status === "complete") {
+            newSteps.forEach((s) => (s.status = "complete"))
             setIsComplete(true)
           }
-        }
-
-        const totalProgress = newSteps.reduce((acc, s) => acc + s.progress, 0) / 4
-        setOverallProgress(totalProgress)
-
-        return newSteps
-      })
-    }, 400)
-
-    const messageInterval = setInterval(() => {
-      if (messageIndex < messages.length) {
-        setStatusMessages((prev) => [...prev.slice(-4), messages[messageIndex]])
-        messageIndex++
-      } else {
-        clearInterval(messageInterval)
+          const totalProgress = newSteps.reduce((acc, s) => acc + s.progress, 0) / 4
+          setOverallProgress(totalProgress)
+          return newSteps
+        })
+      } catch (e) {
+        // Ignore parse errors
       }
-    }, 800)
-
-    return () => {
-      clearInterval(progressInterval)
-      clearInterval(messageInterval)
     }
-  }, [])
+    eventSource.onerror = () => {
+      eventSource.close()
+    }
+    return () => {
+      eventSource.close()
+    }
+  }, [jobId])
 
   return (
     <div className="min-h-screen text-white relative overflow-hidden flex items-center justify-center">

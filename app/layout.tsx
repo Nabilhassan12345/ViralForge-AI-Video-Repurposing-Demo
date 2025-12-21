@@ -12,8 +12,8 @@ const _geistMono = V0_Font_Geist_Mono({ subsets: ['latin'], weight: ["100","200"
 const _sourceSerif_4 = V0_Font_Source_Serif_4({ subsets: ['latin'], weight: ["200","300","400","500","600","700","800","900"] })
 
 export const metadata: Metadata = {
-  title: "OpusClip - Turn Long Videos into Viral Clips",
-  description: "AI-powered video clipping tool that converts long videos into platform-optimized short clips",
+  title: "ViralForge - Turn Long Videos into Scroll-Stopping Shorts",
+  description: "ViralForge turns long videos into scroll-stopping Shorts optimized for TikTok, Instagram Reels, and YouTube Shorts.",
   generator: "v0.app",
 }
 

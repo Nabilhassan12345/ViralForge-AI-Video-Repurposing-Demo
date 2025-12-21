@@ -12,8 +12,11 @@ export type Platform = "youtube" | "linkedin" | "reels" | "shorts" | "tiktok" | 
 export default function Home() {
   const [currentScreen, setCurrentScreen] = useState<Screen>("upload")
   const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>(["tiktok", "reels", "shorts"])
+  const [jobId, setJobId] = useState<string | null>(null)
 
-  const handleGenerate = () => {
+  const handleJobCreated = (job_id: string, platforms: string[]) => {
+    setJobId(job_id)
+    setSelectedPlatforms(platforms as Platform[])
     setCurrentScreen("processing")
   }
 
@@ -23,6 +26,7 @@ export default function Home() {
 
   const handleGenerateAnother = () => {
     setCurrentScreen("upload")
+    setJobId(null)
   }
 
   return (
@@ -37,10 +41,10 @@ export default function Home() {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="w-full"
           >
-            <UploadScreen onGenerate={handleGenerate} />
+            <UploadScreen onJobCreated={handleJobCreated} />
           </motion.div>
         )}
-        {currentScreen === "processing" && (
+        {currentScreen === "processing" && jobId && (
           <motion.div
             key="processing"
             initial={{ opacity: 0, y: 20 }}
@@ -49,10 +53,10 @@ export default function Home() {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="w-full"
           >
-            <ProcessingScreen selectedPlatforms={selectedPlatforms} onComplete={handleProcessingComplete} />
+            <ProcessingScreen jobId={jobId} selectedPlatforms={selectedPlatforms} onComplete={handleProcessingComplete} />
           </motion.div>
         )}
-        {currentScreen === "results" && (
+        {currentScreen === "results" && jobId && (
           <motion.div
             key="results"
             initial={{ opacity: 0, y: 20 }}
@@ -61,7 +65,7 @@ export default function Home() {
             transition={{ duration: 0.4, ease: "easeOut" }}
             className="w-full"
           >
-            <ResultsScreen selectedPlatforms={selectedPlatforms} onGenerateAnother={handleGenerateAnother} />
+            <ResultsScreen jobId={jobId} selectedPlatforms={selectedPlatforms} onGenerateAnother={handleGenerateAnother} />
           </motion.div>
         )}
       </AnimatePresence>

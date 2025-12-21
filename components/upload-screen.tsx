@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { useState, useCallback, useRef } from "react"
+import { uploadVideo } from "../lib/api"
 import { Upload, Link, Play, X, Zap } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 import { ViralForgeLogo, AnimatedBackground, PrimaryButton, PlatformPill, PhonePreviewCard } from "./ui/shared"
@@ -48,11 +49,12 @@ const exampleOutputs = [
   { platform: "x", score: 92, duration: "<1m", thumbnail: "/woman-sitting-on-orange-couch-talking-podcast-inte.jpg" },
 ]
 
-interface UploadScreenProps {
-  onGenerate: () => void
+  onJobCreated: (job_id: string, selectedPlatforms: string[]) => void
 }
 
-export function UploadScreen({ onGenerate }: UploadScreenProps) {
+export function UploadScreen({ onJobCreated }: UploadScreenProps) {
+    const [uploading, setUploading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [file, setFile] = useState<File | null>(null)
   const [url, setUrl] = useState("")
@@ -99,6 +101,23 @@ export function UploadScreen({ onGenerate }: UploadScreenProps) {
 
   const removeFile = () => {
     setFile(null)
+  }
+
+  const handleGenerate = async () => {
+    setError(null)
+    if (!file) {
+      setError("Please select a video file to upload.")
+      return
+    }
+    setUploading(true)
+    try {
+      const { job_id } = await uploadVideo(file, selectedPlatforms)
+      onJobCreated(job_id, selectedPlatforms)
+    } catch (e: any) {
+      setError(e.message || "Failed to upload video.")
+    } finally {
+      setUploading(false)
+    }
   }
 
   return (
@@ -177,7 +196,9 @@ export function UploadScreen({ onGenerate }: UploadScreenProps) {
                 className="flex-1 bg-transparent text-white placeholder-zinc-500 outline-none text-sm py-2"
               />
             </div>
-            <PrimaryButton onClick={onGenerate}>Get clips</PrimaryButton>
+            <PrimaryButton onClick={handleGenerate} disabled={uploading}>
+              {uploading ? "Uploading..." : "Get clips"}
+            </PrimaryButton>
           </div>
           <p className="text-center text-zinc-500 text-xs mt-2">
             <span className="text-violet-400 font-medium">Wiro</span> generates the 2–3s hook visual for maximum
@@ -380,9 +401,10 @@ export function UploadScreen({ onGenerate }: UploadScreenProps) {
           transition={{ delay: 0.45 }}
           className="text-center mb-8"
         >
-          <PrimaryButton onClick={onGenerate} className="px-10 py-4 text-base">
-            Generate Viral Versions
+          <PrimaryButton onClick={handleGenerate} className="px-10 py-4 text-base" disabled={uploading}>
+            {uploading ? "Uploading..." : "Generate Viral Versions"}
           </PrimaryButton>
+          {error && <div className="text-red-400 mt-2">{error}</div>}
           <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-zinc-500">
             <span>Powered by</span>
             <span className="text-violet-400 font-medium">Wiro AI</span>

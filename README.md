@@ -1,30 +1,52 @@
-# OpusClip UI recreation
 
-*Automatically synced with your [v0.app](https://v0.app) deployments*
+# ViralForge Frontend (Next.js)
 
-[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?style=for-the-badge&logo=vercel)](https://vercel.com/nabilhassan12345s-projects/v0-opus-clip-ui-recreation)
-[![Built with v0](https://img.shields.io/badge/Built%20with-v0.app-black?style=for-the-badge)](https://v0.app/chat/q7wKDLQ4o7L)
+Modern UI for the ViralForge AI Video Repurposing platform. Upload long-form videos and generate platform-optimized short clips for TikTok, Reels, Shorts, and more.
 
-## Overview
+## Features
+- 🎬 Upload long-form video and select target platforms
+- ⚡ Real-time processing status (SSE)
+- 🪄 AI-powered hooks and captions
+- 📱 Download platform-specific clips
 
-This repository will stay in sync with your deployed chats on [v0.app](https://v0.app).
-Any changes you make to your deployed app will be automatically pushed to this repository from [v0.app](https://v0.app).
+## Getting Started (Local Dev)
 
-## Deployment
+1. **Install dependencies:**
+	```bash
+	cd frontend
+	npm install
+	```
+2. **Configure environment:**
+	```bash
+	cp .env.local.example .env.local
+	# Edit .env.local if needed (set NEXT_PUBLIC_API_BASE_URL)
+	```
+3. **Start the dev server:**
+	```bash
+	npm run dev
+	```
+	App runs at http://localhost:3000
 
-Your project is live at:
+4. **Backend:**
+	- Make sure the ViralForge FastAPI backend is running (see ../README.md for backend setup)
+	- Default API URL: http://localhost:8000
 
-**[https://vercel.com/nabilhassan12345s-projects/v0-opus-clip-ui-recreation](https://vercel.com/nabilhassan12345s-projects/v0-opus-clip-ui-recreation)**
+## Usage
 
-## Build your app
+1. Upload a video and select platforms
+2. Watch real-time progress
+3. Download your generated clips!
 
-Continue building your app on:
+## Environment Variables
 
-**[https://v0.app/chat/q7wKDLQ4o7L](https://v0.app/chat/q7wKDLQ4o7L)**
+- `NEXT_PUBLIC_API_BASE_URL` — Backend API URL (default: http://localhost:8000)
 
-## How It Works
+## Project Structure
 
-1. Create and modify your project using [v0.app](https://v0.app)
-2. Deploy your chats from the v0 interface
-3. Changes are automatically pushed to this repository
-4. Vercel deploys the latest version from this repository
+- `app/` — Next.js app directory
+- `components/` — React UI components
+- `lib/` — API utilities
+
+## License
+
+MIT

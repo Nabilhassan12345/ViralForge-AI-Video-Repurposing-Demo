@@ -17,28 +17,68 @@ const platformConfig: Record<Platform, { duration: string; score: number }> = {
 
 const defaultDemoClips: Platform[] = ["tiktok", "reels", "shorts"]
 
+
+import { useEffect } from "react"
+import { getJobResults } from "../lib/api"
+
 interface ResultsScreenProps {
+  jobId: string
   selectedPlatforms: Platform[]
   onGenerateAnother: () => void
 }
 
-export function ResultsScreen({ selectedPlatforms, onGenerateAnother }: ResultsScreenProps) {
+type ClipResult = {
+  platform: Platform
+  url: string
+  preview_url?: string
+  duration?: string
+  score?: number
+}
+
+export function ResultsScreen({ jobId, selectedPlatforms, onGenerateAnother }: ResultsScreenProps) {
   const [downloadedPlatforms, setDownloadedPlatforms] = useState<Platform[]>([])
   const [playingPreview, setPlayingPreview] = useState<Platform | null>(null)
   const [hoveredCard, setHoveredCard] = useState<Platform | null>(null)
   const [downloadingAll, setDownloadingAll] = useState(false)
+  const [results, setResults] = useState<ClipResult[] | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    setLoading(true)
+    setError(null)
+    getJobResults(jobId)
+      .then((data) => {
+        // Expecting: { results: [{ platform, url, preview_url, ... }] }
+        setResults(data.results || [])
+        setLoading(false)
+      })
+      .catch((e) => {
+        setError("Failed to fetch results")
+        setLoading(false)
+      })
+  }, [jobId])
 
   const platforms = selectedPlatforms && selectedPlatforms.length > 0 ? selectedPlatforms : defaultDemoClips
   const clipCount = platforms.length
 
-  const handleDownload = (platform: Platform) => {
+  const handleDownload = (platform: Platform, url?: string) => {
+    if (url) {
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${platform}.mp4`
+      a.click()
+    }
     setDownloadedPlatforms([...downloadedPlatforms, platform])
     setTimeout(() => {
       setDownloadedPlatforms((prev) => prev.filter((p) => p !== platform))
     }, 2000)
   }
 
-  const handlePreview = (platform: Platform) => {
+  const handlePreview = (platform: Platform, previewUrl?: string) => {
+    if (previewUrl) {
+      window.open(previewUrl, '_blank')
+    }
     setPlayingPreview(platform)
     setTimeout(() => {
       setPlayingPreview(null)
@@ -47,21 +87,40 @@ export function ResultsScreen({ selectedPlatforms, onGenerateAnother }: ResultsS
 
   const handleDownloadAll = () => {
     setDownloadingAll(true)
+    // Download all clips
+    if (results) {
+      results.forEach((clip) => handleDownload(clip.platform, clip.url))
+    }
     setTimeout(() => {
       setDownloadingAll(false)
     }, 2000)
   }
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-white">
+        <AnimatedBackground />
+        <div className="z-10">Loading results...</div>
+      </div>
+    )
+  }
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-white">
+        <AnimatedBackground />
+        <div className="z-10 text-red-400">{error}</div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen text-white relative overflow-hidden">
       <AnimatedBackground />
-
       <div className="w-full max-w-5xl mx-auto relative z-10 px-4 py-8">
         {/* Logo */}
         <div className="mb-8">
           <ViralForgeLogo />
         </div>
-
         {/* Success Banner */}
         <motion.div
           initial={{ opacity: 0, scale: 0.9 }}
@@ -75,7 +134,7 @@ export function ResultsScreen({ selectedPlatforms, onGenerateAnother }: ResultsS
             className="inline-flex items-center gap-2 bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-5 py-2.5 rounded-2xl mb-4 shadow-lg shadow-emerald-500/10"
           >
             <Check className="w-5 h-5" />
-            <span className="text-sm font-semibold">{clipCount} clips generated successfully</span>
+            <span className="text-sm font-semibold">{results?.length || 0} clips generated successfully</span>
           </motion.div>
         </motion.div>
 
