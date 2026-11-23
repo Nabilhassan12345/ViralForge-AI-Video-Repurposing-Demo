@@ -12,7 +12,7 @@
 
 **Transform long-form videos into viral short-form content for TikTok, Instagram Reels, and YouTube Shorts**
 
-[Live Demo](#demo) • [Features](#features) • [Getting Started](#getting-started) • [Tech Stack](#tech-stack)
+[Live Demo](https://v0-opus-clip-ui-recreation.vercel.app) • [Features](#features) • [Getting Started](#getting-started) • [Tech Stack](#tech-stack)
 
 </div>
 
