@@ -1,5 +1,8 @@
 # ViralForge - AI Video Repurposing Demo
 
+![ViralForge home screen](docs/screenshots/home.png)
+
+
 <div align="center">
 
 ![ViralForge](https://img.shields.io/badge/ViralForge-AI%20Video%20Tool-7c3aed?style=for-the-badge)
