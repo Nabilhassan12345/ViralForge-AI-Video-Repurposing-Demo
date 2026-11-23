@@ -1,5 +1,8 @@
 # ViralForge - AI Video Repurposing Demo
 
+![ViralForge home screen](docs/screenshots/home.png)
+
+
 <div align="center">
 
 ![ViralForge](https://img.shields.io/badge/ViralForge-AI%20Video%20Tool-7c3aed?style=for-the-badge)
@@ -9,7 +12,7 @@
 
 **Transform long-form videos into viral short-form content for TikTok, Instagram Reels, and YouTube Shorts**
 
-[Live Demo](#demo) • [Features](#features) • [Getting Started](#getting-started) • [Tech Stack](#tech-stack)
+[Live Demo](https://v0-opus-clip-ui-recreation.vercel.app) • [Features](#features) • [Getting Started](#getting-started) • [Tech Stack](#tech-stack)
 
 </div>
 
